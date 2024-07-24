@@ -1,5 +1,6 @@
 # QAP Mapper
 A site selection tool for new LIHTC developments in Georgia
+![qap-demo-1-gif](https://github.com/user-attachments/assets/ced14ea6-9105-488c-aba9-6b4568c62836)
 
 For background on this project and a non-technical overview, please see the [project overview page](https://receptive-muenster-7fe.notion.site/QAP-Mapper-2d274826428549879f6b29a4b7a82c9c?pvs=4).
 
