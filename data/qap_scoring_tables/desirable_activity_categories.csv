@@ -1,0 +1,19 @@
+category,qapDesirableActivity,placeType,filterIn,filterText,pointsGroup
+Retail & Restaurants,Big Box store,department_store,keep,target|walmart|costco|bj|sam's club,1
+Retail & Restaurants,Department store,department_store,,,2
+Retail & Restaurants,Supermarket,supermarket,,convenience,1
+Retail & Restaurants,Restaurant,restaurant,,,2
+Medical Care,Hospital,hospital,keep,hospital,1
+Medical Care,Medical care provider,"doctor, dentist, dental_clinic",,,1
+Medical Care,Pharmacy,pharmacy,,,1
+Education & Child Care,Preschool,preschool,,,1
+Education & Child Care,Technical College System,university,keep,Technical College,2
+Community Assets,School,"primary_school, secondary_school",,,1
+Community Assets,Community/recreational center,community_center,,,1
+Community Assets,Large park,park,,,1
+Community Assets,Small park,park,,,2
+Community Assets,Public library,library,remove,little free|community book box|christian,1
+Community Assets,Fire station or police station,"fire_station, police",remove,alarm|alrm,2
+Community Assets,Bank,bank,,,2
+Community Assets,Place of worship,"church, hindu_temple, mosque, synagogue",remove,spiritual healer,2
+Community Assets,Post office,post_office,,,2
