@@ -1,0 +1,46 @@
+.map-container {
+  /* position: absolute; */
+  height: 100vh;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.mapboxgl-ctrl-attrib {
+  height: 0px;  
+}
+
+.title-header {
+  position: absolute;
+  font-size: 24px;
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1; /* Make sure the TitleHeader appears above the map */
+  background-color: rgba(229, 229, 229, 0.9); /* Set a background color with some transparency */
+  padding: 10px;
+  border-radius: 8px;
+}
+
+#geocoder {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+}
+
+.mapboxgl-ctrl-geocoder {
+  width: 300px !important;
+  font-size: 12px !important;
+}
+
+.coordinates {
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  z-index: 1;
+  background: white;
+  padding: 10px;
+  border-radius: 5px;
+}

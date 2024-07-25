@@ -1,0 +1,175 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Google Places API Exploration
+Pull closest X POI to my address (ranked in order of proximity)
+
+```{r}
+library(httr)
+library(jsonlite)
+
+# Establish site address
+site_latitude <- 33.76977928647271
+site_longitude <- -84.30220923083071
+
+# Define the API key
+api_key <- "your_google_api_key"
+poi_type <- 'library'
+
+# Find nearby POI - function
+# Arguments: 
+# 1) Place type (Google Places) (https://developers.google.com/maps/documentation/places/web-service/supported_types)
+# 2) Site latitude and longitude
+
+get_nearby_poi <- function(poi_type, site_latitude, site_longitude) {
+
+# Define the request parameters
+request <- list(
+  #includedType = 'restaurant',
+  textQuery = "junkyard",
+  locationRestriction = list(
+    rectangle = list(
+      low = list(
+    latitude = 33.74623,
+    longitude = -84.31877
+  ),
+  high = list(
+    latitude = 33.78971,
+    longitude = -84.26661
+    )
+  )
+),
+  rankPreference = 'DISTANCE',
+  maxResultCount=20
+)
+
+# Convert the request body to JSON
+json_request <- toJSON(request, auto_unbox = TRUE)
+
+field_mask <- 'places.displayName,places.location,places.shortFormattedAddress,places.viewport'
+  
+# Make the POST request to the Places API
+response <- POST(
+  url = 'https://places.googleapis.com/v1/places:searchText',
+  add_headers(
+    'Content-Type' = 'application/json',
+    'X-Goog-Api-Key' = api_key,
+    'X-Goog-FieldMask' = field_mask
+  ),
+  body = json_request
+)
+
+# Parse the response
+data <- fromJSON(content(response, as = "text"))
+
+# Reformat as data frame
+if(!is.null(data$places))  {
+  nearby_places <- data.frame(poi_type = poi_type,
+                               name = data$places$displayName$text,
+                               address = data$places$shortFormattedAddress,
+                               latitude = data$places$location$latitude,
+                               longitude = data$places$location$longitude)
+}
+else {
+  # If no results within distance filter, return an empty df
+  nearby_places <- data.frame()
+}
+
+return(nearby_places)
+}
+
+```
+
+#Step 2: Take location of closest result(s) and calculate driving distances to each
+Return driving distances 
+
+```{r}
+
+library(httr)
+library(jsonlite)
+
+# Calculate driving distances
+
+
+# Function to get driving distances
+get_driving_distance <- function(site_latitude, site_longitude, destinations, api_key) {
+
+# Create lat/long string for API
+site_lat_long <- paste0(site_latitude, ",", site_longitude)
+
+destination_str <- paste(apply(destinations, 1, 
+                               function(row) paste0(row["latitude"], ",", row["longitude"])), collapse = "|")
+  url <- paste0(
+    "https://maps.googleapis.com/maps/api/distancematrix/json?origins=",
+    site_lat_long, "&destinations=", destination_str, "&key=", api_key
+  )
+  
+  response <- GET(url)
+  content <- fromJSON(content(response, "text", encoding = "UTF-8"))
+  #results <- content$rows$elements
+  
+  results <- data.frame(destinations,
+                        miles_away = content$rows$elements[[1]]$distance$value/1609)
+  
+  # Filter distance calcuations to closest POI (remove others)
+  results <- results[1,]
+
+  return(results)
+}
+
+```
+
+Test run of POI and distance functions
+
+```{r}
+
+poi_list <- list(
+  "department_store", 
+  # "department_store", # Adjust to make more specific re: Walmart/Target
+  "supermarket",
+  "restaurant",
+  "hospital",
+  "doctor", "dentist",
+  "pharmacy",
+  "preschool",
+  "primary_school", "secondary_school",
+  # "town_square", # only for rural
+  "community_center",
+  "park",
+  "park",
+  "library",
+  "fire_station", "police",
+  "bank",
+  "church", "hindu_temple", "mosque", "synagogue",
+  "post_office"
+)
+
+desirable_activity_pois <- data.frame()
+
+for (poi in poi_list) {
+  # Pull closest POI locations (3 closest)
+  nearby_poi_result <- get_nearby_poi(poi, site_latitude, site_longitude)
+  
+  # Only run if there's a result within 1.5 miles (>0 rows in nearby_poi)
+  if(nrow(nearby_poi_result) > 0) {
+    
+  # Add driving distance column to df  
+  nearby_poi_result <- get_driving_distance(site_latitude, site_longitude, nearby_poi_result, api_key)
+  
+  # Append poi row to desirable_activity df
+  desirable_activity_pois <- rbind(desirable_activity_pois, nearby_poi_result)
+  } 
+  
+}
+
+
+```
+
+```{r}
+
+distances <- get_driving_distance(site_latitude, site_longitude, nearby_places, api_key)
+
+```
+

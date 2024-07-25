@@ -1,0 +1,110 @@
+---
+title: "ATL Parcel Data Exploration"
+output: html_notebook
+---
+
+Data sourced from: https://opendata.atlantaregional.com/datasets/a57125fcac534eb58c1d63325894e6e8_0/explore?location=33.741799%2C-84.400488%2C16.97
+
+Load dataset...
+```{r}
+# Load the necessary libraries
+library(sf)
+library(ggplot2)
+
+# Read the GeoJSON file
+geo_data <- st_read("your_project_directory/data/parcel_data/Tax_Parcel_2023.geojson")
+
+```
+
+```{r}
+# Filter the data for shape_area > 10000
+print(nrow(geo_data))
+
+
+filtered_data <- geo_data[geo_data$Shape__Area > 20000, ]
+print(nrow(filtered_data))
+
+```
+
+```{r}
+# Plot the filtered data
+ggplot(data = filtered_data) +
+  geom_sf() +
+  ggtitle("Parcels with Shape Area > 20000") +
+  theme_minimal()
+
+```
+
+```{r}
+
+library(dplyr)
+
+filtered_data %>% st_drop_geometry() %>% group_by(CLASSCD) %>% summarise(cnt=n()) %>% arrange(-cnt)
+
+```
+
+```{r}
+
+# Load necessary libraries
+library(ggplot2)
+library(ggmap)
+library(ggspatial)
+library(osmdata)
+
+# Register API key
+register_google(key= "your_google_api_key")
+
+# Load necessary libraries
+library(ggmap)
+library(ggplot2)
+library(osmdata)
+library(sf)
+
+# Define the center of Atlanta
+atlanta_center <- c(lon = -84.3880, lat = 33.7490)
+
+# Get the city limits of Atlanta
+atlanta_city_limits <- opq(bbox = getbb("Atlanta, Georgia")) %>%
+  add_osm_feature(key = "admin_level", value = "8") %>%
+  osmdata_sf()
+
+# Get the map of Atlanta using OpenStreetMap
+atlanta_map <- get_map(location = atlanta_center, zoom = 10)
+
+# Create a data frame for the circle
+circle_data <- data.frame(
+  lon = atlanta_center["lon"],
+  lat = atlanta_center["lat"],
+  radius = 50000  # Radius in meters (50 km)
+)
+
+# Calculate the circle's coordinates
+circle_coords <- data.frame(
+  lon = atlanta_center["lon"] + (circle_data$radius / 111320) * cos(seq(0, 2 * pi, length.out = 100)),
+  lat = atlanta_center["lat"] + (circle_data$radius / 111320) * sin(seq(0, 2 * pi, length.out = 100))
+)
+
+# Plot the map with the circle
+p <- ggmap(atlanta_map) +
+  geom_sf(data = atlanta_city_limits$osm_multipolygons, fill = NA, color = "red", size = 1) +
+  geom_path(data = circle_data, aes(x = lon, y = lat), color = "blue", size = 1) +
+  ggtitle("Map of Atlanta with 50km Radius Circle") +
+  theme_minimal()
+
+# Print the plot
+print(p)
+
+```
+
+```{r}
+library(googleway)
+
+google_key = "your_google_api_key"
+
+res <- google_places(search_string = "Restaurants in Atlanta, Georgia",
+                     key = google_key,
+                     maxResults=0)
+
+```
+
+
